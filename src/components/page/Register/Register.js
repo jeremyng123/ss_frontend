@@ -7,14 +7,9 @@ const const_t = 4;
 
 export default function Register() {
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password1, setPassword1] = useState("");
   const [password2, setPassword2] = useState("");
-  const [tail1, setTail1] = useState("");
-  const [tail2, setTail2] = useState("");
-  const [genPasswordType, setGenPasswordType] = useState(
-    "chaffing-by-tweaking"
-  );
-  const [promptTail, setPromptTail] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
 
@@ -22,37 +17,18 @@ export default function Register() {
 
   const validateForm = () => {
     return (
-      username.length > 0 &&
-      password1 === password2 &&
-      password1.length > 0 &&
-      !/[^a-zA-Z]/.test(password1)
+      username.length > 0 && password1 === password2 && password1.length > 0
     );
-  };
-
-  const validateTail = () => {
-    return (
-      tail1.length >= const_t &&
-      tail1 === tail2 &&
-      tail2.length >= const_t &&
-      /^\d+$/.test(tail1)
-    );
-  };
-
-  const promptUserForTail = () => {
-    return setPromptTail(!promptTail);
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    setPromptTail(false);
 
     const data = axios
       .post("http://localhost:5000/register", {
         username: username,
+        email: email,
         password: password1,
-        tail: tail1,
-        genPasswordType: genPasswordType,
-        t: tail1.length,
       })
       .then((response) => {
         setSuccess(true);
@@ -83,52 +59,6 @@ export default function Register() {
             }}
           >
             Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* register password with tail */}
-      <Modal show={promptTail}>
-        <Modal.Header closeButton>
-          <Modal.Title>Add tail to your password!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          This will be concatenated to your password. <br />
-          <br />
-          For example: password + 1234 = password1234
-          <br />
-          <br />
-          <Form.Group>
-            <Form.Label>Tail</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder="Enter tail of length 4"
-              value={tail1}
-              onChange={(e) => setTail1(e.target.value)}
-            />
-            <Form.Text className="text-muted">
-              all numbers, at least length of 4
-            </Form.Text>
-          </Form.Group>
-          <Form.Group>
-            <Form.Label>Confirmed Tail</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder="Enter tail again"
-              value={tail2}
-              onChange={(e) => setTail2(e.target.value)}
-            />
-          </Form.Group>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button
-            block
-            type="submit"
-            size="lg"
-            disabled={!validateTail()}
-            onClick={handleSubmit}
-          >
-            Register
           </Button>
         </Modal.Footer>
       </Modal>
@@ -167,6 +97,17 @@ export default function Register() {
       </Form.Group>
 
       <Form.Group>
+        <Form.Label>Email</Form.Label>
+        <Form.Control
+          autoFocus
+          type="email"
+          placeholder="Enter username"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+      </Form.Group>
+
+      <Form.Group>
         <Form.Label>Password</Form.Label>
         <Form.Control
           type="password"
@@ -177,8 +118,7 @@ export default function Register() {
           }}
         />
         <Form.Text className="text-muted">
-          (Your password must be at least 8 characters long. Do not include
-          numbers or symbols)
+          (Your password must be at least 8 characters long)
         </Form.Text>
       </Form.Group>
 
@@ -192,7 +132,7 @@ export default function Register() {
         />
       </Form.Group>
 
-      <Form.Group>
+      {/* <Form.Group>
         <Form.Check
           name="genPasswordType"
           type="radio"
@@ -216,14 +156,9 @@ export default function Register() {
           value="hybrid"
           onChange={(e) => setGenPasswordType(e.target.value)}
         />
-      </Form.Group>
+      </Form.Group> */}
 
-      <Button
-        block
-        size="lg"
-        disabled={!validateForm()}
-        onClick={promptUserForTail}
-      >
+      <Button block size="lg" disabled={!validateForm()} type="submit">
         Register
       </Button>
       <p className="already-register text-right">
