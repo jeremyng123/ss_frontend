@@ -10,7 +10,8 @@ import { IconContext } from "react-icons/lib";
  * Creates a navbar in every page
  * @return {render}
  */
-function Navbar() {
+function Navbar(props) {
+  console.log(props);
   const [click, setClick] = useState(false);
   const [button, setButton] = useState(true);
 
@@ -52,7 +53,66 @@ function Navbar() {
                   Home
                 </Link>
               </li>
-              <li className="nav-item">
+              {props.currentUser ? (
+                <>
+                  <li className="nav-item">
+                    <Link to={"/profile"} className="nav-links">
+                      Profile
+                    </Link>
+                  </li>
+                  <li className="nav-btn">
+                    {button ? (
+                      <Link to="/" className="btn-link">
+                        <Button
+                          buttonStyle="btn--outline"
+                          onClick={props.logout}
+                        >
+                          Logout
+                        </Button>
+                      </Link>
+                    ) : (
+                      <Link
+                        to="/"
+                        className="btn-link"
+                        onClick={() => {
+                          closeMobileMenu();
+                          props.logout();
+                        }}
+                      >
+                        <Button
+                          buttonStyle="btn--outline"
+                          buttonSize="btn--mobile"
+                        >
+                          Logout
+                        </Button>
+                      </Link>
+                    )}
+                  </li>
+                </>
+              ) : (
+                <li className="nav-btn">
+                  {button ? (
+                    <Link to="/register" className="btn-link">
+                      <Button buttonStyle="btn--outline">Register</Button>
+                    </Link>
+                  ) : (
+                    <Link
+                      to="/register"
+                      className="btn-link"
+                      onClick={closeMobileMenu}
+                    >
+                      <Button
+                        buttonStyle="btn--outline"
+                        buttonSize="btn--mobile"
+                      >
+                        Register
+                      </Button>
+                    </Link>
+                  )}
+                </li>
+              )}
+
+              {/* <li className="nav-item">
                 <Link
                   to="/profile"
                   className="nav-links"
@@ -60,29 +120,7 @@ function Navbar() {
                 >
                   Profile
                 </Link>
-              </li>
-              <li className="nav-item">
-                <Link to="/" className="nav-links" onClick={closeMobileMenu}>
-                  Products
-                </Link>
-              </li>
-              <li className="nav-btn">
-                {button ? (
-                  <Link to="/register" className="btn-link">
-                    <Button buttonStyle="btn--outline">Register</Button>
-                  </Link>
-                ) : (
-                  <Link
-                    to="/register"
-                    className="btn-link"
-                    onClick={closeMobileMenu}
-                  >
-                    <Button buttonStyle="btn--outline" buttonSize="btn--mobile">
-                      Register
-                    </Button>
-                  </Link>
-                )}
-              </li>
+              </li> */}
             </ul>
           </div>
         </div>
