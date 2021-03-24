@@ -1,150 +1,126 @@
-import React, { useState } from "react";
-import { Modal, Button, Form } from "react-bootstrap";
-import axios from "axios";
+import React, { useState, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Redirect } from "react-router-dom";
 
-export default function Login() {
+import Form from "react-validation/build/form";
+import Input from "react-validation/build/input";
+import CheckButton from "react-validation/build/button";
+
+import { login } from "../../../actions/auth";
+
+const required = (value) => {
+  if (!value) {
+    return (
+      <div className="alert alert-danger" role="alert">
+        This field is required!
+      </div>
+    );
+  }
+};
+
+const Login = (props) => {
+  const form = useRef();
+  const checkBtn = useRef();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
-  const [gotHoneyword, setGotHoneyword] = useState(false);
-  const [gotSugarword, setGotSugarword] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const validateForm = () => {
-    return username.length > 0 && password.length > 0;
+  const { isLoggedIn } = useSelector((state) => state.auth);
+  const { message } = useSelector((state) => state.message);
+
+  const dispatch = useDispatch();
+
+  const onChangeUsername = (e) => {
+    const username = e.target.value;
+    setUsername(username);
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
-    const data = axios
-      .post("http://localhost:5000/login", {
-        username: username,
-        password: password,
-      })
-      .then((response) => {
-        console.log(response.data);
-        if (response.data === "sugarword") {
-          setGotSugarword(true);
-        } else if (response.data === "honeyword") {
-          setGotHoneyword(true);
-        } else if (response.data === "failed") {
-          setFailed(true);
-        } else {
-          setError(
-            "Strange... none of the response returned the correct data..."
-          );
-        }
-        return;
-      })
-      .catch((error) => {
-        console.log("TODO: catch error", error.response);
-        setError(JSON.stringify(error, null, 1));
-        return error;
-      });
+  const onChangePassword = (e) => {
+    const password = e.target.value;
+    setPassword(password);
   };
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+
+    setLoading(true);
+
+    form.current.validateAll();
+
+    if (checkBtn.current.context._errors.length === 0) {
+      dispatch(login(username, password))
+        .then(() => {
+          props.history.push("/profile");
+          window.location.reload();
+        })
+        .catch(() => {
+          setLoading(false);
+        });
+    } else {
+      setLoading(false);
+    }
+  };
+
+  if (isLoggedIn) {
+    return <Redirect to="/profile" />;
+  }
 
   return (
-    <div className="Login">
-      <Form onSubmit={handleSubmit}>
-        {/* Error modal */}
-        <Modal show={error != null}>
-          <Modal.Header>
-            <Modal.Title>Error</Modal.Title>
-          </Modal.Header>
+    <div className="col-md-12">
+      <div className="card card-container">
+        <img
+          src="//ssl.gstatic.com/accounts/ui/avatar_2x.png"
+          alt="profile-img"
+          className="profile-img-card"
+        />
 
-          <Modal.Body>
-            <p>{error != null ? error : null}</p>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button
-              variant="danger"
-              onClick={() => {
-                setError(null);
-              }}
-            >
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal>
+        <Form onSubmit={handleLogin} ref={form}>
+          <div className="form-group">
+            <label htmlFor="username">Username</label>
+            <Input
+              type="text"
+              className="form-control"
+              name="username"
+              value={username}
+              onChange={onChangeUsername}
+              validations={[required]}
+            />
+          </div>
 
-        {/* success banner, only shows if attained sugarword */}
-        <Modal show={gotSugarword}>
-          <Modal.Header>
-            <Modal.Title>Logged in!</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>User logged in!</Modal.Body>
-          <Modal.Footer>
-            <Button variant="success" onClick={() => setGotSugarword(false)}>
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal>
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <Input
+              type="password"
+              className="form-control"
+              name="password"
+              value={password}
+              onChange={onChangePassword}
+              validations={[required]}
+            />
+          </div>
 
-        {/* success banner, only shows if attained sugarword */}
-        <Modal show={gotHoneyword}>
-          <Modal.Header>
-            <Modal.Title>Logged in!</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>User logged in! (admin alerted)</Modal.Body>
-          <Modal.Footer>
-            <Button variant="warning" onClick={() => setGotHoneyword(false)}>
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal>
+          <div className="form-group">
+            <button className="btn btn-primary btn-block" disabled={loading}>
+              {loading && (
+                <span className="spinner-border spinner-border-sm"></span>
+              )}
+              <span>Login</span>
+            </button>
+          </div>
 
-        {/* password not in sweetwords */}
-        <Modal show={failed}>
-          <Modal.Header>
-            <Modal.Title>Wrong credentials?</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            Either the username or password is incorrect. please try again
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="info" onClick={() => setFailed(false)}>
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal>
-
-        <h3>Login</h3>
-        <Form.Group size="lg" controlId="username">
-          <Form.Label>Username</Form.Label>
-          <Form.Control
-            autoFocus
-            type="username"
-            placeholder="Enter username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
-        </Form.Group>
-
-        <Form.Group size="lg" controlId="password">
-          <Form.Label>Password</Form.Label>
-          <Form.Control
-            type="password"
-            placeholder="Enter password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </Form.Group>
-
-        <Form.Group controlId="formBasicCheckbox">
-          <Form.Check type="checkbox" label="Remember me" />
-        </Form.Group>
-
-        <Button block size="lg" type="submit" disabled={!validateForm}>
-          Login
-        </Button>
-        <p className="register text-right">
-          <a href="/register">Create account</a>
-        </p>
-        {/* <p className="forgot-password text-right">
-              <a href="#">Forgot password?</a>
-            </p> */}
-      </Form>
+          {message && (
+            <div className="form-group">
+              <div className="alert alert-danger" role="alert">
+                {message}
+              </div>
+            </div>
+          )}
+          <CheckButton style={{ display: "none" }} ref={checkBtn} />
+        </Form>
+      </div>
     </div>
   );
-}
+};
+
+export default Login;
