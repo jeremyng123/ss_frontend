@@ -42,7 +42,7 @@ function App() {
 
   return (
     <Router history={history}>
-      <Navbar currentUser={currentUser} />
+      <Navbar currentUser={currentUser} logout={logOut} />
       <Switch>
         <Route exact path={["/", "/home"]} component={Home} />
         <Route exact path="/login" component={Login} />

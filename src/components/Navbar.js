@@ -56,7 +56,11 @@ function Navbar(props) {
               {props.currentUser ? (
                 <>
                   <li className="nav-item">
-                    <Link to={"/profile"} className="nav-links">
+                    <Link
+                      to="/profile"
+                      className="nav-links"
+                      onClick={closeMobileMenu}
+                    >
                       Profile
                     </Link>
                   </li>
@@ -65,7 +69,10 @@ function Navbar(props) {
                       <Link to="/" className="btn-link">
                         <Button
                           buttonStyle="btn--outline"
-                          onClick={props.logout}
+                          onClick={() => {
+                            props.logout();
+                            closeMobileMenu();
+                          }}
                         >
                           Logout
                         </Button>
@@ -92,7 +99,11 @@ function Navbar(props) {
               ) : (
                 <>
                   <li className="nav-item">
-                    <Link to={"/login"} className="nav-links">
+                    <Link
+                      to={"/login"}
+                      className="nav-links"
+                      onClick={closeMobileMenu}
+                    >
                       Log in
                     </Link>
                   </li>
