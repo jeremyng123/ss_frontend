@@ -1,13 +1,12 @@
-import axios from "axios";
-import React, { useRef, useState } from "react";
-import { Modal, Form, Button } from "react-bootstrap";
+import React, { useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router";
 
+import Form from "react-validation/build/form";
+import Input from "react-validation/build/input";
+import CheckButton from "react-validation/build/button";
 import { isEmail } from "validator";
-import { register } from "../../../actions/auth";
 
-const const_t = 4;
+import { register } from "../../../actions/auth";
 
 const required = (value) => {
   if (!value) {
@@ -55,128 +54,90 @@ const Register = () => {
 
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [password1, setPassword1] = useState("");
-  const [password2, setPassword2] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState(null);
-  const [samepwdCheck, setSamepwdCheck] = useState("");
+  const [password, setPassword] = useState("");
+  const [successful, setSuccessful] = useState(false);
 
   const { message } = useSelector((state) => state.message);
   const dispatch = useDispatch();
 
-  const history = useHistory();
+  const onChangeUsername = (e) => {
+    const username = e.target.value;
+    setUsername(username);
+  };
+
+  const onChangeEmail = (e) => {
+    const email = e.target.value;
+    setEmail(email);
+  };
+
+  const onChangePassword = (e) => {
+    const password = e.target.value;
+    setPassword(password);
+  };
 
   const handleRegister = (e) => {
     e.preventDefault();
 
-    setSuccess(false);
+    setSuccessful(false);
 
     form.current.validateAll();
 
     if (checkBtn.current.context._errors.length === 0) {
-      dispatch(register(username, email, password1))
+      dispatch(register(username, email, password))
         .then(() => {
-          setSuccess(true);
+          setSuccessful(true);
         })
         .catch(() => {
-          setSuccess(false);
+          setSuccessful(false);
         });
     }
   };
-
-  const validateForm = () => {
-    return (
-      username.length > 2 &&
-      username.length < 21 &&
-      password1 === password2 &&
-      password1.length > 5 &&
-      password1.length < 41
-    );
-  };
-
-  // const handleSubmit = (event) => {
-  //   event.preventDefault();
-
-  //   const data = axios
-  //     .post("http://localhost:5000/register", {
-  //       username: username,
-  //       email: email,
-  //       password: password1,
-  //     })
-  //     .then((response) => {
-  //       setSuccess(true);
-  //       return;
-  //     })
-  //     .catch((error) => {
-  //       setError(JSON.stringify(error, null, 1));
-  //       return error;
-  //     });
-  // };
 
   return (
     <div className="auth-wrapper">
       <div className="auth-inner">
         <Form onSubmit={handleRegister} ref={form}>
-          {!success && (
+          {!successful && (
             <div>
-              <h3>Register</h3>
-              <Form.Group>
-                <Form.Label>Username</Form.Label>
-                <Form.Control
-                  autoFocus
+              <div className="form-group">
+                <label htmlFor="username">Username</label>
+                <Input
                   type="text"
+                  className="form-control"
                   name="username"
-                  placeholder="Enter username"
                   value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={onChangeUsername}
                   validations={[required, vusername]}
                 />
-              </Form.Group>
+              </div>
 
-              <Form.Group>
-                <Form.Label>Email</Form.Label>
-                <Form.Control
-                  type="email"
+              <div className="form-group">
+                <label htmlFor="email">Email</label>
+                <Input
+                  type="text"
+                  className="form-control"
                   name="email"
-                  placeholder="Enter email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={onChangeEmail}
                   validations={[required, validEmail]}
                 />
-              </Form.Group>
+              </div>
 
-              <Form.Group>
-                <Form.Label>Password</Form.Label>
-                <Form.Control
+              <div className="form-group">
+                <label htmlFor="password">Password</label>
+                <Input
                   type="password"
-                  name="password1"
-                  placeholder="Enter password"
-                  value={password1}
-                  onChange={(e) => {
-                    setPassword1(e.target.value);
-                  }}
+                  className="form-control"
+                  name="password"
+                  value={password}
+                  onChange={onChangePassword}
                   validations={[required, vpassword]}
                 />
-                <Form.Text className="text-muted">
-                  (Your password must be at least 8 characters long)
-                </Form.Text>
-              </Form.Group>
+              </div>
 
-              <Form.Group>
-                <Form.Label>Confirmed password</Form.Label>
-                <Form.Control
-                  type="password"
-                  name="password2"
-                  placeholder="Enter password again"
-                  value={password2}
-                  onChange={(e) => setPassword2(e.target.value)}
-                  validations={[required, vpassword]}
-                />
-              </Form.Group>
-
-              <Button block size="lg" type="submit" disabled={!validateForm()}>
-                Register
-              </Button>
+              <div className="form-group">
+                <button className="btn btn-primary btn-block">Sign Up</button>
+              </div>
               <p className="already-register text-right">
                 Already registered <a href="/login">sign in?</a>
               </p>
@@ -184,19 +145,18 @@ const Register = () => {
           )}
 
           {message && (
-            <div>
-              <Form.Group>
-                <div
-                  className={
-                    success ? "alert alert-success" : "alert alert-danger"
-                  }
-                  role="alert"
-                >
-                  {message}
-                </div>
-              </Form.Group>
+            <div className="form-group">
+              <div
+                className={
+                  successful ? "alert alert-success" : "alert alert-danger"
+                }
+                role="alert"
+              >
+                {message}
+              </div>
             </div>
           )}
+          <CheckButton style={{ display: "none" }} ref={checkBtn} />
         </Form>
       </div>
     </div>
